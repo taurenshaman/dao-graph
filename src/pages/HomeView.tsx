@@ -21,33 +21,62 @@ import {
     Flex,
     IconButton,
     Avatar,
-    Icon
+    Icon,
+    Spacer,
+    Breadcrumb,
+    BreadcrumbItem,
+    Link,
+    Spinner
 } from "@chakra-ui/react";
 import { listDaos } from '@daohaus/moloch-v3-data';
 import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
 import { ViewData } from "../client/ViewData";
+import { ChainsInfo } from "../client/ChainsInfo";
 import { useNavigate } from "react-router-dom";
 import { RoutesData } from "../client/RoutesData";
-import { AragonIcon, DAOSquareIcon, DAOhausIcon, EthereumIcon } from "../icons/Icons";
+import { AragonIcon, ArbitrumIcon, CeloIcon, DAOSquareIcon, DAOhausIcon, EthereumIcon, GnosisIcon, OptimismIcon, PolygonIcon } from "../icons/Icons";
 import { DAOInfo } from "../models/DAOInfo";
 import { DAOhaus } from "../platforms/DAOhaus";
-import { FaHammer, FaUserFriends } from "react-icons/fa";
+import { FaChevronRight, FaHammer, FaHome, FaUserFriends } from "react-icons/fa";
 
 export const HomeView = () => {
     const [daos, setDaos] = useState(new Array<DAOInfo>());
+    const [currentNetworkId, setCurrentNetworkId] = useState("");
+    const [currentNetworkName, setCurrentNetworkName] = useState("[Select one network]");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
     let networkIcon = EthereumIcon;
 
+    const switchNetwork = async (newNetworkId: "0x1" | "0x5" | "0x64" | "0xa" | "0x89" | "0xa4b1", networkName: string) => {
+        if (currentNetworkId === newNetworkId) return;
+        setCurrentNetworkId(newNetworkId);
+        setCurrentNetworkName(networkName);
+        await loadDaos(newNetworkId);
+    }
+
     const loadDaos = async (chainId: "0x1" | "0x5" | "0x64" | "0xa" | "0x89" | "0xa4b1" = "0x1") => {
         setDaos([]);
-        const res = await listDaos({
-            networkId: chainId,
-            graphApiKeys: {
-                "0x1": '23b6fc3e2f8313a2ee6c04b4d443d3da',
-            },
-        });
+        setLoading(true);
+        let res;
+        try {
+            res = await listDaos({
+                networkId: chainId,
+                graphApiKeys: {
+                    "0x1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//eth
+                    "0x5": "23b6fc3e2f8313a2ee6c04b4d443d3da",//goerli
+                    "0x64": "23b6fc3e2f8313a2ee6c04b4d443d3da",//gnosis
+                    "0x89": "23b6fc3e2f8313a2ee6c04b4d443d3da",//polygon
+                    "0xa4b1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//arb
+                    "0xa": "23b6fc3e2f8313a2ee6c04b4d443d3da"//OP
+                },
+            });
+        }
+        finally {
+            setLoading(false);
+        }
+
         if (res.error) {
             toast({
                 title: 'Error',
@@ -58,10 +87,26 @@ export const HomeView = () => {
             });
             return;
         }
-        console.log(res.items);
+        //console.log(res.items);
         const daoPlatform = new DAOhaus();
         daoPlatform.parse(res.items);
         setDaos(daoPlatform.items);
+    }
+
+    const getNetworkIcon = () => {
+        switch (currentNetworkId) {
+            case ChainsInfo.ethereum.mainnet.requestParams.chainId:
+                return EthereumIcon;
+            case ChainsInfo.arbitrum.mainnet.requestParams.chainId:
+                return ArbitrumIcon;
+            case ChainsInfo.gnosis.mainnet.requestParams.chainId:
+                return GnosisIcon;
+            case ChainsInfo.optimism.mainnet.requestParams.chainId:
+                return OptimismIcon;
+            case ChainsInfo.polygon.mainnet.requestParams.chainId:
+                return PolygonIcon;
+        }
+        return EthereumIcon;
     }
 
     useEffect(() => {
@@ -70,7 +115,7 @@ export const HomeView = () => {
         // };
         // You need to restrict it at some point
         // This is just dummy code and should be replaced by actual
-        loadDaos();
+        //loadDaos();
     }, []);
 
     return (
@@ -93,27 +138,72 @@ export const HomeView = () => {
                             isDisabled={true} />
                     </VStack>
                 </Box>
-                <Box m={1}>
-                    <Wrap spacing='30px'>
+                <Box m={1} width="100%">
+                    <Flex alignItems="center">
+                        <Breadcrumb spacing='8px' separator={<FaChevronRight color='gray.500' />}>
+                            <BreadcrumbItem><FaHome /></BreadcrumbItem>
+                            <BreadcrumbItem>
+                                <Text>{currentNetworkName}</Text>
+                            </BreadcrumbItem>
+                        </Breadcrumb>
+                        {loading ? <Spinner /> : null}
+                        <Spacer />
+                        <HStack>
+                            <IconButton isRound={true} isDisabled={currentNetworkId === "0x1"}
+                                variant='solid' bg="transparent"
+                                title="Ethereum" aria-label='Ethereum' fontSize='20px'
+                                icon={<EthereumIcon />}
+                                onClick={e => switchNetwork("0x1", "Ethereum")} />
+                            <IconButton isRound={true} isDisabled={currentNetworkId === "0xa4b1"}
+                                variant='solid' bg="transparent"
+                                title="Arbitrum" aria-label='Arbitrum' fontSize='20px'
+                                icon={<ArbitrumIcon />}
+                                onClick={e => switchNetwork("0xa4b1", "Arbitrum")} />
+                            {/* <IconButton isRound={true} isDisabled={currentNetworkId === ""}
+                                variant='solid' bg="transparent"
+                                title="Celo" aria-label='Celo' fontSize='20px'
+                                icon={<CeloIcon />} /> */}
+                            <IconButton isRound={true} isDisabled={currentNetworkId === "0x64"}
+                                variant='solid' bg="transparent"
+                                title="Gnosis" aria-label='Gnosis' fontSize='20px'
+                                icon={<GnosisIcon />}
+                                onClick={e => switchNetwork("0x64", "Gnosis")} />
+                            <IconButton isRound={true} isDisabled={currentNetworkId === "0xa"}
+                                variant='solid' bg="transparent"
+                                title="OP" aria-label='OP' fontSize='20px'
+                                icon={<OptimismIcon />}
+                                onClick={e => switchNetwork("0xa", "Optimism")} />
+                            <IconButton isRound={true} isDisabled={currentNetworkId === "0x89"}
+                                variant='solid' bg="transparent"
+                                title="Polygon" aria-label='Polygon' fontSize='20px'
+                                icon={<PolygonIcon />}
+                                onClick={e => switchNetwork("0x89", "Polygon")} />
+                        </HStack>
+                    </Flex>
+                    {currentNetworkId.length === 0 ? <Center bg='#4338ca' h='200px' color='white'>
+                        <Heading as="h2" size='2xl'>Choose a network to start!</Heading>
+                    </Center> : <Wrap spacing='30px'>
                         {daos.map((item: DAOInfo, index: number) => (
                             <WrapItem key={index}>
                                 <Card width="260px" height="320px">
                                     <CardHeader title={item.name}>
                                         <Flex flex='1' gap='4' alignItems='center'>
                                             <Avatar name={item.name} src={item.avatar} />
-                                            <Heading size='sm' textOverflow="ellipsis">{item.name}</Heading>
+                                            <Heading size='sm' textOverflow="ellipsis">
+                                                <Link href={`https://admin.daohaus.club/#/molochv3/${currentNetworkId}/${item.id}`}>{item.name}</Link>
+                                            </Heading>
                                         </Flex>
                                     </CardHeader>
                                     <CardBody>
                                         <Stack divider={<StackDivider />} spacing='4'>
                                             <Box>
                                                 <Heading size='xs' textTransform='uppercase'>Bio</Heading>
-                                                <Text pt='2' fontSize='sm' height="110px" overflowY="scroll">{item.description}</Text>
+                                                <Text pt='2' fontSize='sm' height="110px" overflowY="auto">{item.description}</Text>
                                             </Box>
                                         </Stack>
                                     </CardBody>
                                     <CardFooter justify='space-between'>
-                                        <Icon as={networkIcon} boxSize={6}/>
+                                        <Icon as={getNetworkIcon()} boxSize={6} />
                                         <Box display='flex' alignItems="center" title="Count of Members">
                                             <Icon as={FaUserFriends} />
                                             <Text ml={2}>{item.activeMemberCount}</Text>
@@ -126,218 +216,9 @@ export const HomeView = () => {
                                 </Card>
                             </WrapItem>
                         ))}
-                    </Wrap>
+                    </Wrap>}
                 </Box>
             </Flex>
-            {/* <Wrap spacing='30px' justify='center'>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Algorand</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><AlgoIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectMyAlgo}>MyAlgo</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Arweave</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><ArIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectAr}>Injected</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Cosmos</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><AtomIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectKeplr}>Keplr</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310">
-                        <CardHeader>
-                            <Heading size='md'>Ethereum</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><EthIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectEth}>Injected</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                {/* <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>JoyID</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><JoyIDIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectJoyID}>CKB: Testnet</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Nervos</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><CkbIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectJoyID}>JoyID: Testnet</Button>
-                                        <Button onClick={connectPW}>PW (Incompatible with CKB)</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Polkadot</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><DotIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectDot}>Web3</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Solana</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><SolIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectSolana}>Injected</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Stacks</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><StacksIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectStacks}>Injected</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-                <WrapItem>
-                    <Card width="260px" height="310px">
-                        <CardHeader>
-                            <Heading size='md'>Tron</Heading>
-                        </CardHeader>
-                        <CardBody>
-                            <Stack divider={<StackDivider />} spacing="4">
-                                <Center>
-                                    <Heading size="3xl"><TrxIcon /></Heading>
-                                </Center>
-                                <Box>
-                                    <HStack>
-                                        <Button onClick={connectTron}>Injected</Button>
-                                    </HStack>
-                                </Box>
-                            </Stack>
-                        </CardBody>
-                    </Card>
-                </WrapItem>
-            </Wrap>
-            <Center margin="50px;">
-                <Heading size="xl">Smart Contract Wallets</Heading>
-            </Center>
-            <Wrap spacing='30px' justify='center'>
-                <WrapItem>
-                    <LinkBox as='article' maxW='sm' p='5' borderWidth='1px' rounded='md'
-                        width="200px" height="200px" cursor="pointer">
-                        <Heading size="md" my="2">
-                            <LinkOverlay onClick={connectUniPassWallet}>UniPass Wallet</LinkOverlay>
-                        </Heading>
-                        <Center marginTop="40px">
-                            <Heading size="3xl"><UnipassIcon /></Heading>
-                        </Center>
-                    </LinkBox>
-                </WrapItem>
-            </Wrap> */}
             <Footer />
         </VStack>
     );
