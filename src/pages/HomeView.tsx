@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress, Divider } from "@chakra-ui/react";
 import { Dao_Filter, Dao_OrderBy, ListDaosQueryResDaos, listDaos } from '@daohaus/moloch-v3-data';
 import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { RoutesData } from "../client/RoutesData";
 import { AragonIcon, ArbitrumIcon, CeloIcon, DAOSquareIcon, DAOhausIcon, EthereumIcon, GnosisIcon, OptimismIcon, PolygonIcon } from "../icons/Icons";
 import { DAOInfo } from "../models/DAOInfo";
+import { PlatformDataType, PlatformsData } from "../platforms/PlatformsData";
 import { DAOhaus, DAOhausNetworkType, DAOhausPagingType, DAOhausUtils } from "../platforms/DAOhaus";
 import { FaArrowLeft, FaArrowRight, FaChevronRight, FaHammer, FaHome, FaSearch, FaUserFriends } from "react-icons/fa";
 import { IListQueryResults } from "@daohaus/data-fetch-utils";
@@ -20,7 +21,7 @@ const createPaging0 = (count_per_page: number = 20): DAOhausPagingType => {
 export const HomeView = () => {
     const CountPerPage: number = 20;
     const [daos, setDaos] = useState(new Array<DAOInfo>());
-    const [currentPlatformName, setCurrentPlatformName] = useState("DAOhaus");
+    const [currentPlatform, setCurrentPlatform] = useState(PlatformsData.daohaus as PlatformDataType);
     const [currentNetworkId, setCurrentNetworkId] = useState("");
     const [currentNetworkName, setCurrentNetworkName] = useState("[Select one network]");
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
@@ -34,6 +35,7 @@ export const HomeView = () => {
     const toast = useToast();
 
     const switchPlatform = () => {}
+    const onPlatformChanged = (newPlatform: PlatformDataType) => {}
 
     const switchNetwork = async (newNetworkId: DAOhausNetworkType, networkName: string) => {
         if (currentNetworkId === newNetworkId) return;
@@ -155,7 +157,8 @@ export const HomeView = () => {
 
     return (
         <VStack spacing={4}>
-            <NavBar />
+            <NavBar onPlatformChanged={onPlatformChanged} />
+            <Divider/>
             <Flex w="100%" minHeight="500px">
                 <Box m={1} width="80px">
                     <VStack>
@@ -173,12 +176,13 @@ export const HomeView = () => {
                             isDisabled={true} />
                     </VStack>
                 </Box>
+                <Divider orientation="vertical"/>
                 <Box m={1} width="100%">
                     <Flex alignItems="center">
-                        <Breadcrumb spacing='8px' separator={<FaChevronRight color='gray.500' />}>
+                        <Breadcrumb spacing='8px' mb="10px" separator={<FaChevronRight color='gray.500' />}>
                             <BreadcrumbItem><FaHome /></BreadcrumbItem>
                             <BreadcrumbItem>
-                                <Text>{currentPlatformName}</Text>
+                                <Text>{currentPlatform.name}</Text>
                             </BreadcrumbItem>
                             <BreadcrumbItem>
                                 <Text>{currentNetworkName}</Text>

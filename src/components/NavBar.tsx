@@ -1,21 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link as ReactLink, useNavigate } from 'react-router-dom';
-import { Box, Flex, Link, Container, useDisclosure, Stack, HStack, IconButton, Menu, MenuButton, Button, MenuList, MenuItem, Spinner, Text, useToast, Avatar, ModalOverlay, Modal, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Center, MenuGroup, MenuDivider, } from '@chakra-ui/react';
+import { Box, Flex, Link, Container, useDisclosure, Stack, HStack, IconButton, Menu, MenuButton, Button, MenuList, MenuItem, Spinner, Text, useToast, Avatar, ModalOverlay, Modal, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Center, MenuGroup, MenuDivider, Icon, } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { Logo } from '../icons/Logo';
 import { RoutesData } from '../client/RoutesData';
-import { FaCross, FaHamburger } from 'react-icons/fa';
+import { FaCross, FaDiscord, FaDiscourse, FaGithub, FaHamburger, FaHammer, FaLink, FaTwitter } from 'react-icons/fa';
 import { ViewData } from '../client/ViewData';
 import { ViewModelBridge } from '../client/ViewModelBridge';
 import { JoyIDIcon, MetaMaskIcon } from '../icons/Icons';
+import { PlatformDataType, PlatformsData } from '../platforms/PlatformsData';
 // import { EthWallet } from '../accounts/EthWallet';
 // import { JoyIDEvmWallet } from '../accounts/JoyIDEvmWallet';
 // import { Wallet } from '../accounts/Wallet';
 // import { DotbitContext } from '../chains/DotbitContext';
 
-export const NavBar = () => {
+export type NavBarType = {
+  onPlatformChanged: (newPlatform: PlatformDataType) => void;
+}
+
+export const NavBar = ({onPlatformChanged}: NavBarType ) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isOpenOverlay, onOpen: onOpenOverlay, onClose: onCloseOverlay } = useDisclosure();
+  const [currentPlatform, setCurrentPlatform] = useState(PlatformsData.daohaus as PlatformDataType);
   const [account, setAccount] = React.useState(ViewData.wallet?.account || "");
   const [displayName, setDisplayName] = React.useState("");
   const nav = useNavigate();
@@ -81,6 +87,20 @@ export const NavBar = () => {
     nav(RoutesData.Home);
   }
 
+  const drawPlatformLinks = (direction: "column" | "row", display: any = {}) => {
+    return (
+      <Stack direction={direction} as={'nav'} spacing={4} fontSize="24px" display={display}>
+        <Link target="_blank" href={currentPlatform.website}><FaLink/></Link>
+        <Link target="_blank" href={currentPlatform.twitter}><FaTwitter/></Link>
+        <Link target="_blank" href={currentPlatform.discord}><FaDiscord/></Link>
+        {currentPlatform.forum.length > 4 ? <Link target="_blank" href={currentPlatform.forum}><FaDiscourse/></Link> : null}
+        <Link target="_blank" href={currentPlatform.github}><FaGithub/></Link>
+        {currentPlatform.gov.length > 4 ? <Link target="_blank" href={currentPlatform.gov}><FaHammer/></Link> : null}
+      </Stack>
+    );
+  }
+  //const normalDisplay = { base: 'none', md: 'flex' };
+
   return (
     <>
       <Box w="100%" px={4}>
@@ -94,13 +114,8 @@ export const NavBar = () => {
             onClick={isOpen ? onClose : onOpen}
           />
           <HStack spacing={8}>
-            <Logo boxSize={12} title="Creator" />
-            <HStack as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
-              <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
-              {/* <Link as={ReactLink} to={RoutesData.Construct}>Composable Demo</Link> */}
-              {/* {account && account.length > 5 ? <Link as={ReactLink} to={RoutesData.Address}>Address</Link> : null} */}
-              {/* {account && account.length > 5 ? <Link as={ReactLink} to={RoutesData.Start}>Mint!</Link> : null} */}
-            </HStack>
+            <Logo boxSize={12} title="DAO Graph" />
+            {drawPlatformLinks("row", { base: 'none', md: 'flex' })}
           </HStack>
 
           <Flex alignItems={'center'}>
@@ -141,11 +156,7 @@ export const NavBar = () => {
         </Flex>
         {isOpen ? (
           <Box pb={4} display={{ md: 'none' }}>
-            <Stack as={'nav'} spacing={4}>
-              <Link as={ReactLink} to={RoutesData.Home}>Home</Link>
-              {/* {account && account.length > 5 ? <Link as={ReactLink} to={RoutesData.Address}>Address</Link> : null} */}
-              {/* {account && account.length > 5 ? <Link as={ReactLink} to={RoutesData.Start}>Mint!</Link> : null} */}
-            </Stack>
+            {drawPlatformLinks("column", {})}
           </Box>
         ) : null}
       </Box>
