@@ -184,9 +184,9 @@ export const HomeView = () => {
                                 <Text>{currentNetworkName}</Text>
                             </BreadcrumbItem>
                         </Breadcrumb>
-                        {loading ? <Spinner /> : null}
+                        {loading ? <Spinner ml="8px" /> : null}
                         <Spacer />
-                        <HStack>
+                        <HStack spacing='5px'>
                             <IconButton isRound={true} isDisabled={currentNetworkId === "0x1"}
                                 variant='solid' bg="transparent"
                                 title="Ethereum" aria-label='Ethereum' fontSize='20px'
