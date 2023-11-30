@@ -1,6 +1,12 @@
 import { PlatformBase } from "./PlatformBase";
 
 export type DAOhausNetworkType = "0x1" | "0x5" | "0x64" | "0xa" | "0x89" | "0xa4b1";
+export type DAOhausPagingType = {
+    pageSize: number;
+    offset?: number;
+    lastId?: string;
+    previousPageLastId?: string;
+} | undefined;
 
 export class DAOhaus extends PlatformBase {
     override parse(originalItems: any) {

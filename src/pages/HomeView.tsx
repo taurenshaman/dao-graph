@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react"
 import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement } from "@chakra-ui/react";
-import { createPaging, listDaos } from '@daohaus/moloch-v3-data';
+import { Dao_Filter, Dao_OrderBy, ListDaosQueryResDaos, listDaos } from '@daohaus/moloch-v3-data';
 import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
 import { ViewData } from "../client/ViewData";
@@ -9,11 +9,11 @@ import { useNavigate } from "react-router-dom";
 import { RoutesData } from "../client/RoutesData";
 import { AragonIcon, ArbitrumIcon, CeloIcon, DAOSquareIcon, DAOhausIcon, EthereumIcon, GnosisIcon, OptimismIcon, PolygonIcon } from "../icons/Icons";
 import { DAOInfo } from "../models/DAOInfo";
-import { DAOhaus, DAOhausNetworkType, DAOhausUtils } from "../platforms/DAOhaus";
+import { DAOhaus, DAOhausNetworkType, DAOhausPagingType, DAOhausUtils } from "../platforms/DAOhaus";
 import { FaArrowLeft, FaArrowRight, FaChevronRight, FaHammer, FaHome, FaSearch, FaUserFriends } from "react-icons/fa";
-import { stringify } from "querystring";
+import { IListQueryResults } from "@daohaus/data-fetch-utils";
 
-const createPaging0 = (count_per_page: number = 20) => {
+const createPaging0 = (count_per_page: number = 20): DAOhausPagingType => {
     return { pageSize: count_per_page, offset: 0, lastId: undefined, previousPageLastId: undefined };
 }
 
@@ -25,8 +25,8 @@ export const HomeView = () => {
     const [currentNetworkName, setCurrentNetworkName] = useState("[Select one network]");
     const [currentPageIndex, setCurrentPageIndex] = useState(0);
     const [currentPaging, setCurrentPaging] = useState(createPaging0(CountPerPage));
-    const [nextPaging, setNextPaging] = useState(undefined as any);
-    const [previousPaging, setPreviousPaging] = useState(undefined as any);
+    const [nextPaging, setNextPaging] = useState(undefined as DAOhausPagingType);
+    const [previousPaging, setPreviousPaging] = useState(undefined as DAOhausPagingType);
     const [queryParam, setQueryParam] = useState("");
     const [lastQueryParam, setLastQueryParam] = useState("");
     const [loading, setLoading] = useState(false);
@@ -61,7 +61,7 @@ export const HomeView = () => {
         // const pageIndex = currentPageIndex + 1;
         // setCurrentPageIndex(pageIndex);
         setCurrentPaging(nextPaging);
-        await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), queryParam.trim());
+        await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), queryParam.trim(), nextPaging);
     }
 
     const previousPage = async () => {
@@ -69,7 +69,7 @@ export const HomeView = () => {
         // const pageIndex = currentPageIndex - 1;
         // setCurrentPageIndex(pageIndex);
         setCurrentPaging(previousPaging);
-        await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), queryParam.trim());
+        await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), queryParam.trim(), previousPaging);
     }
 
     const search = async (param: string) => {
@@ -83,11 +83,11 @@ export const HomeView = () => {
         await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), q);
     }
 
-    const loadDaos = async (chainId: DAOhausNetworkType = "0x1", searchParam: string = "") => {
+    const loadDaos = async (chainId: DAOhausNetworkType = "0x1", searchParam: string = "", paging = createPaging0(CountPerPage)) => {
         //setLastDaos(daos);
-        setDaos([]);
+        //setDaos([]);
         setLoading(true);
-        let res;
+        let res: IListQueryResults<Dao_OrderBy, Dao_Filter, ListDaosQueryResDaos>;
         // filter:
         // /mnt/e/github/dao-graph/node_modules/@daohaus/moloch-v3-data/src/subgraph/schema.generated.d.ts
         try {
@@ -95,7 +95,7 @@ export const HomeView = () => {
                 networkId: chainId,
                 ordering: { orderBy: "createdAt", orderDirection: "desc" },
                 filter: searchParam.length > 0 ? { name_contains_nocase: searchParam } : undefined,
-                paging: currentPaging,
+                paging: paging,
                 graphApiKeys: {
                     "0x1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//eth
                     "0x5": "23b6fc3e2f8313a2ee6c04b4d443d3da",//goerli
@@ -105,8 +105,8 @@ export const HomeView = () => {
                     "0xa": "23b6fc3e2f8313a2ee6c04b4d443d3da"//OP
                 },
             });
-            setNextPaging(res.nextPaging);
-            setPreviousPaging(res.previousPaging);
+            setNextPaging(old => res.nextPaging);
+            setPreviousPaging(old => res.previousPaging);
         }
         finally {
             setLoading(false);
@@ -220,26 +220,27 @@ export const HomeView = () => {
                     </Flex>
                     {currentNetworkId.length === 0 ? <Center bg='#4338ca' h='200px' color='white'>
                         <Heading as="h2" size='2xl'>Choose a network to start!</Heading>
-                    </Center> : <Center h="50px">
-                        <Flex alignItems='center' gap='2'>
-                            <IconButton isRound={true} isDisabled={previousPaging === undefined}
-                                variant='solid' colorScheme='#4f46e5' aria-label='Previous Page' fontSize='20px' icon={<FaArrowLeft />}
-                                onClick={previousPage}/>
-                            <InputGroup>
-                                <Input w="200px" placeholder='Search DAO Name' type="text" value={queryParam}
-                                    onChange={(e) => {setQueryParam( old => e.target.value.toLowerCase());}}
-                                    onKeyUp={(e) => {
-                                        if(e.key === "Enter"){ search(queryParam); }
-                                    }}/>
-                                <InputRightElement>
-                                    <FaSearch />
-                                </InputRightElement>
-                            </InputGroup>
-                            <IconButton isRound={true} isDisabled={nextPaging === undefined}
-                                variant='solid' colorScheme='#4f46e5' aria-label='Next Page' fontSize='20px' icon={<FaArrowRight />}
-                                onClick={nextPage}/>
-                        </Flex>
-                    </Center>}
+                    </Center> : <Flex alignItems='center' gap='2' h="50px">
+                        <IconButton isRound={true} isDisabled={previousPaging === undefined}
+                            variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
+                            icon={<FaArrowLeft />}
+                            onClick={previousPage}/>
+                        <InputGroup w="240px">
+                            <Input placeholder='Search DAO Name' type="text" value={queryParam}
+                                onChange={(e) => { setQueryParam( old => e.target.value.toLowerCase()); } }
+                                onKeyUp={(e) => {
+                                    if(e.key === "Enter"){ search(queryParam); }
+                                }}/>
+                            <InputRightElement>
+                                <FaSearch />
+                            </InputRightElement>
+                        </InputGroup>
+                        <IconButton isRound={true} isDisabled={nextPaging === undefined}
+                            variant='outline' colorScheme='#4f46e5' aria-label='Next Page' title="Next Page" fontSize='20px'
+                            icon={<FaArrowRight />}
+                            onClick={nextPage}/>
+                        <Spacer/>
+                    </Flex>}
                     {currentNetworkId.length > 0 && daos.length === 0 ? <Center bg='#4338ca' h='250px'>
                         <VStack spacing="40px">
                             <Heading as="h2" size='2xl' color='#c7d2fe'>OOPS! Found nothing!</Heading>
@@ -282,6 +283,17 @@ export const HomeView = () => {
                             </WrapItem>
                         ))}
                     </Wrap>}
+                    {currentNetworkId.length === 0 ? null : <Flex alignItems='center' gap='2' h="50px">
+                        <Spacer />
+                        <IconButton isRound={true} isDisabled={previousPaging === undefined}
+                            variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
+                            icon={<FaArrowLeft />}
+                            onClick={previousPage}/>
+                        <IconButton isRound={true} isDisabled={nextPaging === undefined}
+                            variant='outline' colorScheme='#4f46e5' aria-label='Next Page' title="Next Page" fontSize='20px'
+                            icon={<FaArrowRight />}
+                            onClick={nextPage}/>
+                    </Flex>}
                 </Box>
             </Flex>
             <Footer />
