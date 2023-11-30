@@ -1,5 +1,7 @@
 import { PlatformBase } from "./PlatformBase";
 
+export type DAOhausNetworkType = "0x1" | "0x5" | "0x64" | "0xa" | "0x89" | "0xa4b1";
+
 export class DAOhaus extends PlatformBase {
     override parse(originalItems: any) {
         this.items = [];
@@ -14,5 +16,12 @@ export class DAOhaus extends PlatformBase {
                 proposalCount: originalItem.proposalCount || 0
             });
         });
+    }
+}
+
+export class DAOhausUtils {
+    static getSupportedNetwork(networkId: string) {
+        let n = networkId as DAOhausNetworkType || "0x1";
+        return n;
     }
 }
