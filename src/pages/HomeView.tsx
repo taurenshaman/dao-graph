@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress } from "@chakra-ui/react";
 import { Dao_Filter, Dao_OrderBy, ListDaosQueryResDaos, listDaos } from '@daohaus/moloch-v3-data';
 import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
@@ -144,14 +144,14 @@ export const HomeView = () => {
         return EthereumIcon;
     }
 
-    useEffect(() => {
-        // React advises to declare the async function directly inside useEffect
-        // async function loadData() {
-        // };
-        // You need to restrict it at some point
-        // This is just dummy code and should be replaced by actual
-        //loadDaos();
-    }, []);
+    // useEffect(() => {
+    //     // React advises to declare the async function directly inside useEffect
+    //     // async function loadData() {
+    //     // };
+    //     // You need to restrict it at some point
+    //     // This is just dummy code and should be replaced by actual
+    //     //loadDaos();
+    // }, []);
 
     return (
         <VStack spacing={4}>
@@ -241,7 +241,10 @@ export const HomeView = () => {
                             onClick={nextPage}/>
                         <Spacer/>
                     </Flex>}
-                    {currentNetworkId.length > 0 && daos.length === 0 ? <Center bg='#4338ca' h='250px'>
+                    {currentNetworkId.length > 0 && loading ? <Center h='250px' px={7}>
+                        <Progress size='xs' w="100%" isIndeterminate />
+                    </Center> : null }
+                    {currentNetworkId.length > 0 && !loading && daos.length === 0 ? <Center bg='#4338ca' h='250px'>
                         <VStack spacing="40px">
                             <Heading as="h2" size='2xl' color='#c7d2fe'>OOPS! Found nothing!</Heading>
                             <Link color='#eef2ff' target="_blank" href="https://summon.daohaus.club/">
