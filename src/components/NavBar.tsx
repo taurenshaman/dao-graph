@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link as ReactLink, useNavigate } from 'react-router-dom';
-import { Box, Flex, Link, Container, useDisclosure, Stack, HStack, IconButton, Menu, MenuButton, Button, MenuList, MenuItem, Spinner, Text, useToast, Avatar, ModalOverlay, Modal, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Center, MenuGroup, MenuDivider, Icon, } from '@chakra-ui/react';
+import { Box, Flex, Link, Container, useDisclosure, Stack, HStack, IconButton, Menu, MenuButton, Button, MenuList, MenuItem, Spinner, Text, useToast, Avatar, ModalOverlay, Modal, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Center, MenuGroup, MenuDivider, Icon, Tag, TagLabel, } from '@chakra-ui/react';
 import { CloseIcon, HamburgerIcon } from '@chakra-ui/icons';
 import { Logo } from '../icons/Logo';
 import { RoutesData } from '../client/RoutesData';
@@ -89,13 +89,16 @@ export const NavBar = ({onPlatformChanged}: NavBarType ) => {
 
   const drawPlatformLinks = (direction: "column" | "row", display: any = {}) => {
     return (
-      <Stack direction={direction} as={'nav'} spacing={4} fontSize="24px" display={display}>
+      <Stack direction={direction} as={'nav'} spacing={4} fontSize="24px" display={display} alignItems="center">
         <Link target="_blank" href={currentPlatform.website}><FaLink/></Link>
         <Link target="_blank" href={currentPlatform.twitter}><FaTwitter/></Link>
         <Link target="_blank" href={currentPlatform.discord}><FaDiscord/></Link>
         {currentPlatform.forum.length > 4 ? <Link target="_blank" href={currentPlatform.forum}><FaDiscourse/></Link> : null}
         <Link target="_blank" href={currentPlatform.github}><FaGithub/></Link>
         {currentPlatform.gov.length > 4 ? <Link target="_blank" href={currentPlatform.gov}><FaHammer/></Link> : null}
+        <Tag size="sm" bg="#a5b4f4" color="#4b5563" title='Version'>
+            <TagLabel>{`v${currentPlatform.version}`}</TagLabel>
+        </Tag>
       </Stack>
     );
   }

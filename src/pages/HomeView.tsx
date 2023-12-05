@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react"
-import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress, Divider } from "@chakra-ui/react";
+import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress, Divider, Tag, TagLeftIcon, TagLabel } from "@chakra-ui/react";
 import { Dao_Filter, Dao_OrderBy, ListDaosQueryResDaos, listDaos } from '@daohaus/moloch-v3-data';
 import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
@@ -178,7 +178,7 @@ export const HomeView = () => {
                 </Box>
                 <Divider orientation="vertical"/>
                 <Box m={1} width="100%">
-                    <Flex alignItems="center">
+                    <Flex alignItems="center" mb={3}>
                         <Breadcrumb spacing='8px' mb="10px" separator={<FaChevronRight color='gray.500' />}>
                             <BreadcrumbItem><FaHome /></BreadcrumbItem>
                             <BreadcrumbItem>

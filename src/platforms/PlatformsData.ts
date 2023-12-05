@@ -10,6 +10,7 @@ export type PlatformDataType = {
     discord: string;
     github: string;
     gov: string;
+    version: number;
 }
 
 export const PlatformsData = {
@@ -21,7 +22,8 @@ export const PlatformsData = {
         forum: "https://forum.aragon.org/",
         discord: "https://discordapp.com/invite/eqQJkdp",
         github: "https://github.com/aragon",
-        gov: "https://aragon.org/aragon-dao"
+        gov: "https://aragon.org/aragon-dao",
+        version: 0
     },
     daohaus: {
         name: "DAOhaus",
@@ -31,7 +33,8 @@ export const PlatformsData = {
         forum: "",
         discord: "https://discord.gg/daohaus",
         github: "https://github.com/HausDAO",
-        gov: "https://admin.daohaus.club/#/molochv3/0xa/0xf5d6b637a9185707f52d40d452956ca49018247a"
+        gov: "https://admin.daohaus.club/#/molochv3/0xa/0xf5d6b637a9185707f52d40d452956ca49018247a",
+        version: 3
     },
     daosquare: {
         name: "DAOSquare",
@@ -41,6 +44,7 @@ export const PlatformsData = {
         forum: "https://forum.daosquare.io/",
         discord: "https://discord.com/invite/daosquare",
         github: "https://github.com/DAOSquare",
-        gov: ""
+        gov: "",
+        version: 0
     },
 };
