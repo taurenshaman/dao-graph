@@ -224,7 +224,7 @@ export const HomeView = () => {
                     </Flex>
                     {currentNetworkId.length === 0 ? <Center bg='#4338ca' h='200px' color='white'>
                         <Heading as="h2" size='2xl'>Choose a network to start!</Heading>
-                    </Center> : <Flex alignItems='center' gap='2' h="50px">
+                    </Center> : <Flex alignItems='center' gap='2' h="50px" mb={3}>
                         <IconButton isRound={true} isDisabled={previousPaging === undefined}
                             variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
                             icon={<FaArrowLeft />}
