@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react"
-import { Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress, Divider, Tag, TagLeftIcon, TagLabel } from "@chakra-ui/react";
+import { chakra, Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress, Divider, Tag, TagLeftIcon, TagLabel } from "@chakra-ui/react";
 import { Dao_Filter, Dao_OrderBy, ListDaosQueryResDaos, listDaos } from '@daohaus/moloch-v3-data';
+import { IListQueryResults } from "@daohaus/data-fetch-utils";
 import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
 import { ViewData } from "../client/ViewData";
@@ -8,11 +9,11 @@ import { ChainsInfo } from "../client/ChainsInfo";
 import { useNavigate } from "react-router-dom";
 import { RoutesData } from "../client/RoutesData";
 import { AragonIcon, ArbitrumIcon, CeloIcon, DAOSquareIcon, DAOhausIcon, EthereumIcon, GnosisIcon, OptimismIcon, PolygonIcon } from "../icons/Icons";
+import coverSvg from "../icons/cover.svg";
 import { DAOInfo } from "../models/DAOInfo";
 import { PlatformDataType, PlatformsData } from "../platforms/PlatformsData";
 import { DAOhaus, DAOhausNetworkType, DAOhausPagingType, DAOhausUtils } from "../platforms/DAOhaus";
 import { FaArrowLeft, FaArrowRight, FaChevronRight, FaHammer, FaHome, FaSearch, FaUserFriends } from "react-icons/fa";
-import { IListQueryResults } from "@daohaus/data-fetch-utils";
 
 const createPaging0 = (count_per_page: number = 20): DAOhausPagingType => {
     return { pageSize: count_per_page, offset: 0, lastId: undefined, previousPageLastId: undefined };
@@ -34,8 +35,8 @@ export const HomeView = () => {
     const navigate = useNavigate();
     const toast = useToast();
 
-    const switchPlatform = () => {}
-    const onPlatformChanged = (newPlatform: PlatformDataType) => {}
+    const switchPlatform = () => { }
+    const onPlatformChanged = (newPlatform: PlatformDataType) => { }
 
     const switchNetwork = async (newNetworkId: DAOhausNetworkType, networkName: string) => {
         if (currentNetworkId === newNetworkId) return;
@@ -76,7 +77,7 @@ export const HomeView = () => {
 
     const search = async (param: string) => {
         const q = param.trim();
-        if(lastQueryParam === q) {
+        if (lastQueryParam === q) {
             return;
         }
 
@@ -146,6 +147,42 @@ export const HomeView = () => {
         return EthereumIcon;
     }
 
+    const renderNetworks = () => {
+        return (
+            <HStack spacing='5px'>
+                <IconButton isRound={true} isDisabled={currentNetworkId === "0x1"}
+                    variant='solid' bg="transparent"
+                    title="Ethereum" aria-label='Ethereum' fontSize='20px'
+                    icon={<EthereumIcon />}
+                    onClick={e => switchNetwork("0x1", "Ethereum")} />
+                <IconButton isRound={true} isDisabled={currentNetworkId === "0xa4b1"}
+                    variant='solid' bg="transparent"
+                    title="Arbitrum" aria-label='Arbitrum' fontSize='20px'
+                    icon={<ArbitrumIcon />}
+                    onClick={e => switchNetwork("0xa4b1", "Arbitrum")} />
+                {/* <IconButton isRound={true} isDisabled={currentNetworkId === ""}
+                                variant='solid' bg="transparent"
+                                title="Celo" aria-label='Celo' fontSize='20px'
+                                icon={<CeloIcon />} /> */}
+                <IconButton isRound={true} isDisabled={currentNetworkId === "0x64"}
+                    variant='solid' bg="transparent"
+                    title="Gnosis" aria-label='Gnosis' fontSize='20px'
+                    icon={<GnosisIcon />}
+                    onClick={e => switchNetwork("0x64", "Gnosis")} />
+                <IconButton isRound={true} isDisabled={currentNetworkId === "0xa"}
+                    variant='solid' bg="transparent"
+                    title="OP" aria-label='OP' fontSize='20px'
+                    icon={<OptimismIcon />}
+                    onClick={e => switchNetwork("0xa", "Optimism")} />
+                <IconButton isRound={true} isDisabled={currentNetworkId === "0x89"}
+                    variant='solid' bg="transparent"
+                    title="Polygon" aria-label='Polygon' fontSize='20px'
+                    icon={<PolygonIcon />}
+                    onClick={e => switchNetwork("0x89", "Polygon")} />
+            </HStack>
+        );
+    }
+
     // useEffect(() => {
     //     // React advises to declare the async function directly inside useEffect
     //     // async function loadData() {
@@ -158,7 +195,7 @@ export const HomeView = () => {
     return (
         <VStack spacing={4}>
             <NavBar onPlatformChanged={onPlatformChanged} />
-            <Divider/>
+            <Divider />
             <Flex w="100%" minHeight="500px">
                 <Box m={1} width="80px">
                     <VStack>
@@ -176,7 +213,7 @@ export const HomeView = () => {
                             isDisabled={true} />
                     </VStack>
                 </Box>
-                <Divider orientation="vertical"/>
+                <Divider orientation="vertical" />
                 <Box m={1} width="100%">
                     <Flex alignItems="center" mb={3}>
                         <Breadcrumb spacing='8px' mb="10px" separator={<FaChevronRight color='gray.500' />}>
@@ -190,64 +227,43 @@ export const HomeView = () => {
                         </Breadcrumb>
                         {loading ? <Spinner ml="8px" /> : null}
                         <Spacer />
-                        <HStack spacing='5px'>
-                            <IconButton isRound={true} isDisabled={currentNetworkId === "0x1"}
-                                variant='solid' bg="transparent"
-                                title="Ethereum" aria-label='Ethereum' fontSize='20px'
-                                icon={<EthereumIcon />}
-                                onClick={e => switchNetwork("0x1", "Ethereum")} />
-                            <IconButton isRound={true} isDisabled={currentNetworkId === "0xa4b1"}
-                                variant='solid' bg="transparent"
-                                title="Arbitrum" aria-label='Arbitrum' fontSize='20px'
-                                icon={<ArbitrumIcon />}
-                                onClick={e => switchNetwork("0xa4b1", "Arbitrum")} />
-                            {/* <IconButton isRound={true} isDisabled={currentNetworkId === ""}
-                                variant='solid' bg="transparent"
-                                title="Celo" aria-label='Celo' fontSize='20px'
-                                icon={<CeloIcon />} /> */}
-                            <IconButton isRound={true} isDisabled={currentNetworkId === "0x64"}
-                                variant='solid' bg="transparent"
-                                title="Gnosis" aria-label='Gnosis' fontSize='20px'
-                                icon={<GnosisIcon />}
-                                onClick={e => switchNetwork("0x64", "Gnosis")} />
-                            <IconButton isRound={true} isDisabled={currentNetworkId === "0xa"}
-                                variant='solid' bg="transparent"
-                                title="OP" aria-label='OP' fontSize='20px'
-                                icon={<OptimismIcon />}
-                                onClick={e => switchNetwork("0xa", "Optimism")} />
-                            <IconButton isRound={true} isDisabled={currentNetworkId === "0x89"}
-                                variant='solid' bg="transparent"
-                                title="Polygon" aria-label='Polygon' fontSize='20px'
-                                icon={<PolygonIcon />}
-                                onClick={e => switchNetwork("0x89", "Polygon")} />
-                        </HStack>
+                        {renderNetworks()}
                     </Flex>
-                    {currentNetworkId.length === 0 ? <Center bg='#4338ca' h='200px' color='white'>
-                        <Heading as="h2" size='2xl'>Choose a network to start!</Heading>
-                    </Center> : <Flex alignItems='center' gap='2' h="50px" mb={3}>
-                        <IconButton isRound={true} isDisabled={previousPaging === undefined}
-                            variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
-                            icon={<FaArrowLeft />}
-                            onClick={previousPage}/>
-                        <InputGroup w="240px">
-                            <Input placeholder='Search DAO Name' type="text" value={queryParam}
-                                onChange={(e) => { setQueryParam( old => e.target.value.toLowerCase()); } }
-                                onKeyUp={(e) => {
-                                    if(e.key === "Enter"){ search(queryParam); }
-                                }}/>
-                            <InputRightElement>
-                                <FaSearch />
-                            </InputRightElement>
-                        </InputGroup>
-                        <IconButton isRound={true} isDisabled={nextPaging === undefined}
-                            variant='outline' colorScheme='#4f46e5' aria-label='Next Page' title="Next Page" fontSize='20px'
-                            icon={<FaArrowRight />}
-                            onClick={nextPage}/>
-                        <Spacer/>
-                    </Flex>}
+                    {currentNetworkId.length === 0 ?
+                        // <Center bg='#4338ca' h='200px' color='white'>
+                        //     <Heading as="h2" size='2xl'>Choose a network to start!</Heading>
+                        // </Center>
+                        <VStack>
+                            <chakra.img src={coverSvg} />
+                            <Heading as="h2" size='2xl' mt={5} mb={5}>Choose a network to start!</Heading>
+                            <Center>
+                            {renderNetworks()}
+                            </Center>
+                        </VStack>
+                        : <Flex alignItems='center' gap='2' h="50px" mb={3}>
+                            <IconButton isRound={true} isDisabled={previousPaging === undefined}
+                                variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
+                                icon={<FaArrowLeft />}
+                                onClick={previousPage} />
+                            <InputGroup w="240px">
+                                <Input placeholder='Search DAO Name' type="text" value={queryParam}
+                                    onChange={(e) => { setQueryParam(old => e.target.value.toLowerCase()); }}
+                                    onKeyUp={(e) => {
+                                        if (e.key === "Enter") { search(queryParam); }
+                                    }} />
+                                <InputRightElement>
+                                    <FaSearch />
+                                </InputRightElement>
+                            </InputGroup>
+                            <IconButton isRound={true} isDisabled={nextPaging === undefined}
+                                variant='outline' colorScheme='#4f46e5' aria-label='Next Page' title="Next Page" fontSize='20px'
+                                icon={<FaArrowRight />}
+                                onClick={nextPage} />
+                            <Spacer />
+                        </Flex>}
                     {currentNetworkId.length > 0 && loading ? <Center h='250px' px={7}>
                         <Progress size='xs' w="100%" isIndeterminate />
-                    </Center> : null }
+                    </Center> : null}
                     {currentNetworkId.length > 0 && !loading && daos.length === 0 ? <Center bg='#4338ca' h='250px'>
                         <VStack spacing="40px">
                             <Heading as="h2" size='2xl' color='#c7d2fe'>OOPS! Found nothing!</Heading>
@@ -295,11 +311,11 @@ export const HomeView = () => {
                         <IconButton isRound={true} isDisabled={previousPaging === undefined}
                             variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
                             icon={<FaArrowLeft />}
-                            onClick={previousPage}/>
+                            onClick={previousPage} />
                         <IconButton isRound={true} isDisabled={nextPaging === undefined}
                             variant='outline' colorScheme='#4f46e5' aria-label='Next Page' title="Next Page" fontSize='20px'
                             icon={<FaArrowRight />}
-                            onClick={nextPage}/>
+                            onClick={nextPage} />
                     </Flex>}
                 </Box>
             </Flex>

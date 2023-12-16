@@ -9,6 +9,7 @@ import { ViewData } from '../client/ViewData';
 import { ViewModelBridge } from '../client/ViewModelBridge';
 import { JoyIDIcon, MetaMaskIcon } from '../icons/Icons';
 import { PlatformDataType, PlatformsData } from '../platforms/PlatformsData';
+import { EthWallet } from '../accounts/EthWallet';
 // import { EthWallet } from '../accounts/EthWallet';
 // import { JoyIDEvmWallet } from '../accounts/JoyIDEvmWallet';
 // import { Wallet } from '../accounts/Wallet';
@@ -65,15 +66,16 @@ export const NavBar = ({onPlatformChanged}: NavBarType ) => {
   //   //await getDIDs();
   //   //nav(RoutesData.Address);
   // }
-  // const connectEth = async () => {
-  //   const wallet = new EthWallet();
-  //   const addr = await wallet.connect();
-  //   ViewData.ethAddress = wallet.account;
-  //   afterConnected(wallet, addr);
-  //   await getDIDs();
+  
+  const connectEth = async () => {
+    const wallet = new EthWallet();
+    const addr = await wallet.connect();
+    ViewData.ethAddress = wallet.account;
+    //afterConnected(wallet, addr);
+    await getDIDs();
 
-  //   //nav(RoutesData.Start);
-  // }
+    //nav(RoutesData.Start);
+  }
 
   const tryDisconnect = async () => {
     setAccount("");
