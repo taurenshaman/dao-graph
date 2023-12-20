@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react"
 import { chakra, Card, CardHeader, CardBody, CardFooter, VStack, InputGroup, InputLeftAddon, Input, Text, Wrap, WrapItem, Heading, Stack, StackDivider, Box, HStack, Button, Center, useToast, LinkBox, LinkOverlay, Flex, IconButton, Avatar, Icon, Spacer, Breadcrumb, BreadcrumbItem, Link, Spinner, InputRightElement, Progress, Divider, Tag, TagLeftIcon, TagLabel } from "@chakra-ui/react";
-import { Dao_Filter, Dao_OrderBy, ListDaosQueryResDaos, listDaos } from '@daohaus/moloch-v3-data';
-import { IListQueryResults } from "@daohaus/data-fetch-utils";
 import { NavBar } from "../components/NavBar";
 import { Footer } from "../components/Footer";
 import { ViewData } from "../client/ViewData";
@@ -12,46 +10,40 @@ import { AragonIcon, ArbitrumIcon, CeloIcon, DAOSquareIcon, DAOhausIcon, Ethereu
 import coverSvg from "../icons/cover.svg";
 import { DAOInfo } from "../models/DAOInfo";
 import { PlatformDataType, PlatformsData } from "../platforms/PlatformsData";
-import { DAOhaus, DAOhausNetworkType, DAOhausPagingType, DAOhausUtils } from "../platforms/DAOhaus";
+import { DAOhaus } from "../platforms/DAOhaus";
 import { FaArrowLeft, FaArrowRight, FaChevronRight, FaHammer, FaHome, FaSearch, FaUserFriends } from "react-icons/fa";
-
-const createPaging0 = (count_per_page: number = 20): DAOhausPagingType => {
-    return { pageSize: count_per_page, offset: 0, lastId: undefined, previousPageLastId: undefined };
-}
+import { PlatformBase } from "../platforms/PlatformBase";
 
 export const HomeView = () => {
     const CountPerPage: number = 20;
     const [daos, setDaos] = useState(new Array<DAOInfo>());
+    const [platform, setPlatform] = useState(undefined as PlatformBase | undefined);
     const [currentPlatform, setCurrentPlatform] = useState(PlatformsData.daohaus as PlatformDataType);
     const [currentNetworkId, setCurrentNetworkId] = useState("");
     const [currentNetworkName, setCurrentNetworkName] = useState("[Select one network]");
-    const [currentPageIndex, setCurrentPageIndex] = useState(0);
-    const [currentPaging, setCurrentPaging] = useState(createPaging0(CountPerPage));
-    const [nextPaging, setNextPaging] = useState(undefined as DAOhausPagingType);
-    const [previousPaging, setPreviousPaging] = useState(undefined as DAOhausPagingType);
+    const [supportedChains, setSupportedChains] = useState(new Array<string>());
     const [queryParam, setQueryParam] = useState("");
     const [lastQueryParam, setLastQueryParam] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
 
-    const switchPlatform = () => { }
+    const switchPlatform = (newPlatform: PlatformBase) => {
+        if(!newPlatform){
+            return;
+        }
+        setPlatform(newPlatform);
+    }
     const onPlatformChanged = (newPlatform: PlatformDataType) => { }
 
-    const switchNetwork = async (newNetworkId: DAOhausNetworkType, networkName: string) => {
+    const switchNetwork = async (newNetworkId: string, networkName: string) => {//DAOhausNetworkType
         if (currentNetworkId === newNetworkId) return;
         setCurrentNetworkId(newNetworkId);
         setCurrentNetworkName(networkName);
         clearQuery();
-        clearPaging();
-        await loadDaos(newNetworkId);
-    }
 
-    const clearPaging = () => {
-        setNextPaging(undefined);
-        setPreviousPaging(undefined);
-        setCurrentPageIndex(0);
-        setCurrentPaging(createPaging0(CountPerPage));
+        platform?.switChain(newNetworkId);
+        await search(queryParam, false);
     }
 
     const clearQuery = () => {
@@ -60,75 +52,46 @@ export const HomeView = () => {
     }
 
     const nextPage = async () => {
-        if (!nextPaging) return;
-        // const pageIndex = currentPageIndex + 1;
-        // setCurrentPageIndex(pageIndex);
-        setCurrentPaging(nextPaging);
-        await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), queryParam.trim(), nextPaging);
-    }
+        if (!platform || !platform.canLoadNextPage()) return;
 
-    const previousPage = async () => {
-        if (!previousPaging) return;
-        // const pageIndex = currentPageIndex - 1;
-        // setCurrentPageIndex(pageIndex);
-        setCurrentPaging(previousPaging);
-        await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), queryParam.trim(), previousPaging);
-    }
-
-    const search = async (param: string) => {
-        const q = param.trim();
-        if (lastQueryParam === q) {
-            return;
-        }
-
-        clearPaging();
-        setLastQueryParam(q);
-        await loadDaos(DAOhausUtils.getSupportedNetwork(currentNetworkId), q);
-    }
-
-    const loadDaos = async (chainId: DAOhausNetworkType = "0x1", searchParam: string = "", paging = createPaging0(CountPerPage)) => {
-        //setLastDaos(daos);
-        //setDaos([]);
-        setLoading(true);
-        let res: IListQueryResults<Dao_OrderBy, Dao_Filter, ListDaosQueryResDaos>;
-        // filter:
-        // /mnt/e/github/dao-graph/node_modules/@daohaus/moloch-v3-data/src/subgraph/schema.generated.d.ts
         try {
-            res = await listDaos({
-                networkId: chainId,
-                ordering: { orderBy: "createdAt", orderDirection: "desc" },
-                filter: searchParam.length > 0 ? { name_contains_nocase: searchParam } : undefined,
-                paging: paging,
-                graphApiKeys: {
-                    "0x1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//eth
-                    "0x5": "23b6fc3e2f8313a2ee6c04b4d443d3da",//goerli
-                    "0x64": "23b6fc3e2f8313a2ee6c04b4d443d3da",//gnosis
-                    "0x89": "23b6fc3e2f8313a2ee6c04b4d443d3da",//polygon
-                    "0xa4b1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//arb
-                    "0xa": "23b6fc3e2f8313a2ee6c04b4d443d3da"//OP
-                },
-            });
-            setNextPaging(old => res.nextPaging);
-            setPreviousPaging(old => res.previousPaging);
+            setLoading(true);
+            await platform.loadDaosNext(queryParam.trim());
+            setDaos(platform.items);
         }
         finally {
             setLoading(false);
         }
+    }
 
-        if (res.error) {
-            toast({
-                title: 'Error',
-                description: res.error.message,
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
+    const previousPage = async () => {
+        if (!platform || !platform.canLoadPreviousPage()) return;
+
+        try {
+            setLoading(true);
+            await platform.loadDaosPrevious(queryParam.trim());
+            setDaos(platform.items);
         }
-        console.log(res);
-        const daoPlatform = new DAOhaus();
-        daoPlatform.parse(res.items);
-        setDaos(daoPlatform.items);
+        finally {
+            setLoading(false);
+        }
+    }
+
+    const search = async (param: string, checkLastSearch: boolean = true) => {
+        const q = param.trim();
+        if (!platform) { return; }
+        if(checkLastSearch && lastQueryParam === q){ return; }
+
+        setLastQueryParam(q);
+        platform?.clearPaging();
+        try {
+            setLoading(true);
+            await platform.loadDaos(q);
+            setDaos(platform.items);
+        }
+        finally {
+            setLoading(false);
+        }
     }
 
     const getNetworkIcon = () => {
@@ -150,47 +113,54 @@ export const HomeView = () => {
     const renderNetworks = () => {
         return (
             <HStack spacing='5px'>
-                <IconButton isRound={true} isDisabled={currentNetworkId === "0x1"}
+                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.ethereum.mainnet.requestParams.chainId}
                     variant='solid' bg="transparent"
                     title="Ethereum" aria-label='Ethereum' fontSize='20px'
                     icon={<EthereumIcon />}
-                    onClick={e => switchNetwork("0x1", "Ethereum")} />
-                <IconButton isRound={true} isDisabled={currentNetworkId === "0xa4b1"}
+                    onClick={e => switchNetwork(ChainsInfo.ethereum.mainnet.requestParams.chainId, ChainsInfo.ethereum.name)} />
+                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.arbitrum.mainnet.requestParams.chainId}
                     variant='solid' bg="transparent"
                     title="Arbitrum" aria-label='Arbitrum' fontSize='20px'
                     icon={<ArbitrumIcon />}
-                    onClick={e => switchNetwork("0xa4b1", "Arbitrum")} />
+                    onClick={e => switchNetwork(ChainsInfo.arbitrum.mainnet.requestParams.chainId, ChainsInfo.arbitrum.name)} />
                 {/* <IconButton isRound={true} isDisabled={currentNetworkId === ""}
                                 variant='solid' bg="transparent"
                                 title="Celo" aria-label='Celo' fontSize='20px'
                                 icon={<CeloIcon />} /> */}
-                <IconButton isRound={true} isDisabled={currentNetworkId === "0x64"}
+                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.gnosis.mainnet.requestParams.chainId}
                     variant='solid' bg="transparent"
                     title="Gnosis" aria-label='Gnosis' fontSize='20px'
                     icon={<GnosisIcon />}
-                    onClick={e => switchNetwork("0x64", "Gnosis")} />
-                <IconButton isRound={true} isDisabled={currentNetworkId === "0xa"}
+                    onClick={e => switchNetwork(ChainsInfo.gnosis.mainnet.requestParams.chainId, ChainsInfo.gnosis.name)} />
+                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.optimism.mainnet.requestParams.chainId}
                     variant='solid' bg="transparent"
                     title="OP" aria-label='OP' fontSize='20px'
                     icon={<OptimismIcon />}
-                    onClick={e => switchNetwork("0xa", "Optimism")} />
-                <IconButton isRound={true} isDisabled={currentNetworkId === "0x89"}
+                    onClick={e => switchNetwork(ChainsInfo.optimism.mainnet.requestParams.chainId, ChainsInfo.optimism.name)} />
+                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.polygon.mainnet.requestParams.chainId}
                     variant='solid' bg="transparent"
                     title="Polygon" aria-label='Polygon' fontSize='20px'
                     icon={<PolygonIcon />}
-                    onClick={e => switchNetwork("0x89", "Polygon")} />
+                    onClick={e => switchNetwork(ChainsInfo.polygon.mainnet.requestParams.chainId, ChainsInfo.polygon.name)} />
             </HStack>
         );
     }
 
-    // useEffect(() => {
-    //     // React advises to declare the async function directly inside useEffect
-    //     // async function loadData() {
-    //     // };
-    //     // You need to restrict it at some point
-    //     // This is just dummy code and should be replaced by actual
-    //     //loadDaos();
-    // }, []);
+    const init = () => {
+        if(!platform){
+            const p = new DAOhaus(PlatformsData.daohaus.supportedChains);
+            setPlatform(p);
+        }
+    }
+
+    useEffect(() => {
+        // React advises to declare the async function directly inside useEffect
+        // async function loadData() {
+        // };
+        // You need to restrict it at some point
+        // This is just dummy code and should be replaced by actual
+        init();
+    }, []);
 
     return (
         <VStack spacing={4}>
@@ -241,7 +211,7 @@ export const HomeView = () => {
                             </Center>
                         </VStack>
                         : <Flex alignItems='center' gap='2' h="50px" mb={3}>
-                            <IconButton isRound={true} isDisabled={previousPaging === undefined}
+                            <IconButton isRound={true} isDisabled={!platform || !platform.canLoadPreviousPage()}
                                 variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
                                 icon={<FaArrowLeft />}
                                 onClick={previousPage} />
@@ -255,7 +225,7 @@ export const HomeView = () => {
                                     <FaSearch />
                                 </InputRightElement>
                             </InputGroup>
-                            <IconButton isRound={true} isDisabled={nextPaging === undefined}
+                            <IconButton isRound={true} isDisabled={!platform || !platform.canLoadNextPage()}
                                 variant='outline' colorScheme='#4f46e5' aria-label='Next Page' title="Next Page" fontSize='20px'
                                 icon={<FaArrowRight />}
                                 onClick={nextPage} />
@@ -267,7 +237,7 @@ export const HomeView = () => {
                     {currentNetworkId.length > 0 && !loading && daos.length === 0 ? <Center bg='#4338ca' h='250px'>
                         <VStack spacing="40px">
                             <Heading as="h2" size='2xl' color='#c7d2fe'>OOPS! Found nothing!</Heading>
-                            <Link color='#eef2ff' target="_blank" href="https://summon.daohaus.club/">
+                            <Link color='#eef2ff' target="_blank" href={platform?.linkOfCreateDAO}>
                                 <Heading as="h2" size='2xl'>👉 Let's summon a DAO! 👈</Heading>
                             </Link>
                         </VStack>
@@ -279,7 +249,7 @@ export const HomeView = () => {
                                         <Flex flex='1' gap='4' alignItems='center'>
                                             <Avatar name={item.name} src={item.avatar} />
                                             <Heading size='sm' textOverflow="ellipsis">
-                                                <Link target="_blank" href={`https://admin.daohaus.club/#/molochv3/${currentNetworkId}/${item.id}`}>{item.name}</Link>
+                                                <Link target="_blank" href={platform?.getLinkOfDAO(item.id)}>{item.name}</Link>
                                             </Heading>
                                         </Flex>
                                     </CardHeader>
@@ -308,11 +278,11 @@ export const HomeView = () => {
                     </Wrap>}
                     {currentNetworkId.length === 0 ? null : <Flex alignItems='center' gap='2' h="50px">
                         <Spacer />
-                        <IconButton isRound={true} isDisabled={previousPaging === undefined}
+                        <IconButton isRound={true} isDisabled={!platform || !platform.canLoadPreviousPage()}
                             variant='outline' colorScheme='#4f46e5' aria-label='Previous Page' title="Previous Page" fontSize='20px'
                             icon={<FaArrowLeft />}
                             onClick={previousPage} />
-                        <IconButton isRound={true} isDisabled={nextPaging === undefined}
+                        <IconButton isRound={true} isDisabled={!platform || !platform.canLoadNextPage()}
                             variant='outline' colorScheme='#4f46e5' aria-label='Next Page' title="Next Page" fontSize='20px'
                             icon={<FaArrowRight />}
                             onClick={nextPage} />

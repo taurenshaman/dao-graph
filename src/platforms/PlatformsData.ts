@@ -1,5 +1,6 @@
 import { ComponentWithAs, ImageProps } from "@chakra-ui/react";
 import { AragonIcon, DAOSquareIcon, DAOhausIcon } from "../icons/Icons";
+import { ChainsInfo } from "../client/ChainsInfo";
 
 export type PlatformDataType = {
     name: string;
@@ -11,6 +12,7 @@ export type PlatformDataType = {
     github: string;
     gov: string;
     version: number;
+    supportedChains: Array<string>
 }
 
 export const PlatformsData = {
@@ -23,7 +25,8 @@ export const PlatformsData = {
         discord: "https://discordapp.com/invite/eqQJkdp",
         github: "https://github.com/aragon",
         gov: "https://aragon.org/aragon-dao",
-        version: 0
+        version: 0,
+        supportedChains: []
     },
     daohaus: {
         name: "DAOhaus",
@@ -34,7 +37,14 @@ export const PlatformsData = {
         discord: "https://discord.gg/daohaus",
         github: "https://github.com/HausDAO",
         gov: "https://admin.daohaus.club/#/molochv3/0xa/0xf5d6b637a9185707f52d40d452956ca49018247a",
-        version: 3
+        version: 3,
+        supportedChains: [
+            ChainsInfo.ethereum.mainnet.requestParams.chainId,
+            ChainsInfo.arbitrum.mainnet.requestParams.chainId,
+            ChainsInfo.gnosis.mainnet.requestParams.chainId,
+            ChainsInfo.optimism.mainnet.requestParams.chainId,
+            ChainsInfo.polygon.mainnet.requestParams.chainId
+        ]
     },
     daosquare: {
         name: "DAOSquare",
@@ -45,6 +55,9 @@ export const PlatformsData = {
         discord: "https://discord.com/invite/daosquare",
         github: "https://github.com/DAOSquare",
         gov: "",
-        version: 0
+        version: 0,
+        supportedChains: [
+            ChainsInfo.gnosis.mainnet.requestParams.chainId
+        ]
     },
 };
