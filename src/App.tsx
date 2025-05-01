@@ -4,7 +4,6 @@ import {
   extendTheme,
 } from "@chakra-ui/react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { ColorModeSwitcher } from "./ColorModeSwitcher";
 import { RoutesData } from "./client/RoutesData";
 import {HomeView} from "./pages/HomeView"
 

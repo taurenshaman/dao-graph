@@ -7,7 +7,7 @@ import { DAOInfo } from '../models/DAOInfo';
 export class DAOSquare extends PlatformBase {
     // nextPaging: DAOhausPagingType = undefined as DAOhausPagingType;
     // previousPaging: DAOhausPagingType = undefined as DAOhausPagingType;
-    graphql_endpoint = "https://api.thegraph.com/subgraphs/name/luhuimao/phoenix-xdai";
+    graphql_endpoint = "https://api.studio.thegraph.com/query/66101/phoenix-base/version/latest";
     client = new ApolloClient({
         //uri: this.graphql_endpoint,
         link: new HttpLink({
@@ -64,8 +64,8 @@ export class DAOSquare extends PlatformBase {
         const first = this.CountPerPage;
         try {
             const ql = query && query.length > 0 ? gql`
-                query listDaos($first: Int!, $query: String!){
-                    daoEntiys(first: $first, orderBy: createTimeStamp, orderDirection: desc, where: {daoName_contains_nocase: $query) {
+                query listDaos($query: String!){
+                    daoEntiys(orderBy: createTimeStamp, orderDirection: desc, where: {daoName_contains_nocase: $query }) {
                         id
                         daoAddr
                         daoName
@@ -74,8 +74,8 @@ export class DAOSquare extends PlatformBase {
                     }
                 }
             ` : gql`
-                query listDaos($first: Int!){
-                    daoEntiys(first: $first, orderBy: createTimeStamp, orderDirection: desc) {
+                query listDaos {
+                    daoEntiys(orderBy: createTimeStamp, orderDirection: desc) {
                         id
                         daoAddr
                         daoName
