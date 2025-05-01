@@ -16,7 +16,7 @@ export class PlatformBase {
         }
         this.chainId = newChainId;
     }
-    getLinkOfDAO(daoId: string) { return ""; }
+    getLinkOfDAO(dao: DAOInfo) { return dao.id; }
     parse(originalItems: any) {}
     clearPaging() {}
     async loadDaos(query: string) {}

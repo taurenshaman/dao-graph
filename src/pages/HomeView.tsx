@@ -266,7 +266,7 @@ export const HomeView = () => {
                                         <Flex flex='1' gap='4' alignItems='center'>
                                             <Avatar name={item.name} src={item.avatar} />
                                             <Heading size='sm' textOverflow="ellipsis">
-                                                <Link target="_blank" href={platform?.getLinkOfDAO(item.id)}>{item.name}</Link>
+                                                <Link target="_blank" href={platform?.getLinkOfDAO(item)}>{item.name}</Link>
                                             </Heading>
                                         </Flex>
                                     </CardHeader>

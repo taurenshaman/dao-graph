@@ -2,6 +2,7 @@ import { Dao_Filter, Dao_OrderBy, ListDaosQueryResDaos, listDaos } from '@daohau
 import { IListQueryResults } from "@daohaus/data-fetch-utils";
 import { PlatformBase } from "./PlatformBase";
 import { ChainsInfo } from '../client/ChainsInfo';
+import { DAOInfo } from '../models/DAOInfo';
 
 export type DAOhausNetworkType = "0x1" | "0x64" | "0xa" | "0x89" | "0xa4b1" | "0x2105" | "0xaa36a7";
 export type DAOhausPagingType = {
@@ -28,7 +29,7 @@ export class DAOhaus extends PlatformBase {
 
     override getDefaultChainId() { return ChainsInfo.ethereum.mainnet.requestParams.chainId; }
 
-    override getLinkOfDAO(daoId: string) { return `https://admin.daohaus.club/#/molochv3/${this.chainId}/${daoId}`; }
+    override getLinkOfDAO(dao: DAOInfo) { return `https://admin.daohaus.club/#/molochv3/${this.chainId}/${dao.id}`; }
 
     override parse(originalItems: any) {
         this.items = [];
@@ -36,6 +37,7 @@ export class DAOhaus extends PlatformBase {
         originalItems.forEach((originalItem) => {
             this.items.push({
                 id: originalItem.id,
+                daoType: "N/A",
                 name: originalItem.name,
                 avatar: originalItem.avatarImg || `https://robohash.org/${originalItem.id}.png?set=set3`,
                 description: originalItem.description || "[Not Set]",

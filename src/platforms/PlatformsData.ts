@@ -55,7 +55,7 @@ export const PlatformsData = {
         forum: "https://forum.daosquare.io/",
         discord: "https://discord.com/invite/daosquare",
         github: "https://github.com/DAOSquare",
-        gov: "",
+        gov: "https://app.daosquare.fi/governomy",
         version: 0,
         supportedChains: [
             ChainsInfo.base.mainnet.requestParams.chainId
