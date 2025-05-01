@@ -41,9 +41,10 @@ export const PlatformsData = {
         supportedChains: [
             ChainsInfo.ethereum.mainnet.requestParams.chainId,
             ChainsInfo.arbitrum.mainnet.requestParams.chainId,
+            ChainsInfo.base.mainnet.requestParams.chainId,
             ChainsInfo.gnosis.mainnet.requestParams.chainId,
             ChainsInfo.optimism.mainnet.requestParams.chainId,
-            ChainsInfo.polygon.mainnet.requestParams.chainId
+            ChainsInfo.polygon.mainnet.requestParams.chainId,
         ]
     },
     daosquare: {
@@ -57,7 +58,7 @@ export const PlatformsData = {
         gov: "",
         version: 0,
         supportedChains: [
-            ChainsInfo.gnosis.mainnet.requestParams.chainId
+            ChainsInfo.base.mainnet.requestParams.chainId
         ]
     },
 };

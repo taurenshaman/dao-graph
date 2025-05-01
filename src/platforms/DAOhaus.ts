@@ -3,7 +3,7 @@ import { IListQueryResults } from "@daohaus/data-fetch-utils";
 import { PlatformBase } from "./PlatformBase";
 import { ChainsInfo } from '../client/ChainsInfo';
 
-export type DAOhausNetworkType = "0x1" | "0x5" | "0x64" | "0xa" | "0x89" | "0xa4b1";
+export type DAOhausNetworkType = "0x1" | "0x64" | "0xa" | "0x89" | "0xa4b1" | "0x2105" | "0xaa36a7";
 export type DAOhausPagingType = {
     pageSize: number;
     offset?: number;
@@ -26,7 +26,7 @@ export class DAOhaus extends PlatformBase {
         this.supportedChains = supported_chains;
     }
 
-    override getDefaultChainId() { return ChainsInfo.gnosis.mainnet.requestParams.chainId; }
+    override getDefaultChainId() { return ChainsInfo.ethereum.mainnet.requestParams.chainId; }
 
     override getLinkOfDAO(daoId: string) { return `https://admin.daohaus.club/#/molochv3/${this.chainId}/${daoId}`; }
 
@@ -62,10 +62,10 @@ export class DAOhaus extends PlatformBase {
                 paging: paging,
                 graphApiKeys: {
                     "0x1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//eth
-                    "0x5": "23b6fc3e2f8313a2ee6c04b4d443d3da",//goerli
+                    "0xa4b1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//arb
+                    "0x2105": "23b6fc3e2f8313a2ee6c04b4d443d3da",//base
                     "0x64": "23b6fc3e2f8313a2ee6c04b4d443d3da",//gnosis
                     "0x89": "23b6fc3e2f8313a2ee6c04b4d443d3da",//polygon
-                    "0xa4b1": "23b6fc3e2f8313a2ee6c04b4d443d3da",//arb
                     "0xa": "23b6fc3e2f8313a2ee6c04b4d443d3da"//OP
                 },
             });

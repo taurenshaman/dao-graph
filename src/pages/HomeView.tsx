@@ -11,16 +11,17 @@ import coverSvg from "../icons/cover.svg";
 import { DAOInfo } from "../models/DAOInfo";
 import { PlatformDataType, PlatformsData } from "../platforms/PlatformsData";
 import { DAOhaus } from "../platforms/DAOhaus";
+import { DAOSquare } from "../platforms/DAOSquare";
 import { FaArrowLeft, FaArrowRight, FaChevronRight, FaHammer, FaHome, FaSearch, FaUserFriends } from "react-icons/fa";
 import { PlatformBase } from "../platforms/PlatformBase";
 
 export const HomeView = () => {
-    const CountPerPage: number = 20;
+    const EmptyNetworkName = "[Select one network]";
     const [daos, setDaos] = useState(new Array<DAOInfo>());
     const [platform, setPlatform] = useState(undefined as PlatformBase | undefined);
-    const [currentPlatform, setCurrentPlatform] = useState(PlatformsData.daohaus as PlatformDataType);
+    const [platformData, setPlatformData] = useState(PlatformsData.daohaus as PlatformDataType);
     const [currentNetworkId, setCurrentNetworkId] = useState("");
-    const [currentNetworkName, setCurrentNetworkName] = useState("[Select one network]");
+    const [currentNetworkName, setCurrentNetworkName] = useState(EmptyNetworkName);
     const [supportedChains, setSupportedChains] = useState(new Array<string>());
     const [queryParam, setQueryParam] = useState("");
     const [lastQueryParam, setLastQueryParam] = useState("");
@@ -28,13 +29,15 @@ export const HomeView = () => {
     const navigate = useNavigate();
     const toast = useToast();
 
-    const switchPlatform = (newPlatform: PlatformBase) => {
-        if(!newPlatform){
-            return;
-        }
+    const switchPlatform = (newPlatform: PlatformBase, data: PlatformDataType) => {
+        if(platform && platform.id === newPlatform.id) { return; }
+        setPlatformData(data);
         setPlatform(newPlatform);
+        setSupportedChains(newPlatform.supportedChains);
+        setCurrentNetworkId("");
+        setCurrentNetworkName(EmptyNetworkName);
+        clearQuery();
     }
-    const onPlatformChanged = (newPlatform: PlatformDataType) => { }
 
     const switchNetwork = async (newNetworkId: string, networkName: string) => {//DAOhausNetworkType
         if (currentNetworkId === newNetworkId) return;
@@ -46,9 +49,14 @@ export const HomeView = () => {
         await search(queryParam, false);
     }
 
+    const supportChain = (chainId: string) => {
+        return currentNetworkId === chainId || supportedChains.indexOf(chainId) < 0;
+    }
+
     const clearQuery = () => {
         setQueryParam("");
         setLastQueryParam("");
+        setDaos([]);
     }
 
     const nextPage = async () => {
@@ -113,31 +121,32 @@ export const HomeView = () => {
     const renderNetworks = () => {
         return (
             <HStack spacing='5px'>
-                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.ethereum.mainnet.requestParams.chainId}
+                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.ethereum.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Ethereum" aria-label='Ethereum' fontSize='20px'
                     icon={<EthereumIcon />}
                     onClick={e => switchNetwork(ChainsInfo.ethereum.mainnet.requestParams.chainId, ChainsInfo.ethereum.name)} />
-                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.arbitrum.mainnet.requestParams.chainId}
+                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.arbitrum.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Arbitrum" aria-label='Arbitrum' fontSize='20px'
                     icon={<ArbitrumIcon />}
                     onClick={e => switchNetwork(ChainsInfo.arbitrum.mainnet.requestParams.chainId, ChainsInfo.arbitrum.name)} />
-                {/* <IconButton isRound={true} isDisabled={currentNetworkId === ""}
-                                variant='solid' bg="transparent"
-                                title="Celo" aria-label='Celo' fontSize='20px'
-                                icon={<CeloIcon />} /> */}
-                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.gnosis.mainnet.requestParams.chainId}
+                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.base.mainnet.requestParams.chainId)}
+                    variant='solid' bg="transparent"
+                    title="Base" aria-label='Base' fontSize='20px'
+                    icon={<CeloIcon />}
+                    onClick={e => switchNetwork(ChainsInfo.base.mainnet.requestParams.chainId, ChainsInfo.base.name)} />
+                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.gnosis.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Gnosis" aria-label='Gnosis' fontSize='20px'
                     icon={<GnosisIcon />}
                     onClick={e => switchNetwork(ChainsInfo.gnosis.mainnet.requestParams.chainId, ChainsInfo.gnosis.name)} />
-                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.optimism.mainnet.requestParams.chainId}
+                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.optimism.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="OP" aria-label='OP' fontSize='20px'
                     icon={<OptimismIcon />}
                     onClick={e => switchNetwork(ChainsInfo.optimism.mainnet.requestParams.chainId, ChainsInfo.optimism.name)} />
-                <IconButton isRound={true} isDisabled={currentNetworkId === ChainsInfo.polygon.mainnet.requestParams.chainId}
+                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.polygon.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Polygon" aria-label='Polygon' fontSize='20px'
                     icon={<PolygonIcon />}
@@ -148,8 +157,9 @@ export const HomeView = () => {
 
     const init = () => {
         if(!platform){
-            const p = new DAOhaus(PlatformsData.daohaus.supportedChains);
-            setPlatform(p);
+            // const p = new DAOhaus(PlatformsData.daohaus.supportedChains);
+            // setPlatform(p);
+            switchPlatform(new DAOhaus(PlatformsData.daohaus.supportedChains), PlatformsData.daohaus);
         }
     }
 
@@ -161,10 +171,10 @@ export const HomeView = () => {
         // This is just dummy code and should be replaced by actual
         init();
     }, []);
-
+    // isDisabled={platform && platform.id === "daosquare"}
     return (
         <VStack spacing={4}>
-            <NavBar onPlatformChanged={onPlatformChanged} />
+            <NavBar platformData={platformData} />
             <Divider />
             <Flex w="100%" minHeight="500px">
                 <Box m={1} width="80px">
@@ -172,15 +182,22 @@ export const HomeView = () => {
                         <IconButton isRound={true}
                             variant='solid' colorScheme='teal' aria-label='DAOhaus' fontSize='20px'
                             icon={<DAOhausIcon />}
-                        />
+                            onClick={(e) => {
+                                switchPlatform(new DAOhaus(PlatformsData.daohaus.supportedChains), PlatformsData.daohaus);
+                            }} />
                         <IconButton isRound={true}
                             variant='solid' colorScheme='teal' aria-label='Aragon' fontSize='20px'
                             icon={<AragonIcon />}
-                            isDisabled={true} />
+                            isDisabled={true}
+                            onClick={(e) => {
+                                //switchPlatform(new DAOSquare(PlatformsData.aragon.supportedChains), PlatformsData.aragon);
+                            }} />
                         <IconButton isRound={true}
                             variant='solid' colorScheme='teal' aria-label='DAOSquare' fontSize='20px'
-                            icon={<DAOSquareIcon />}
-                            isDisabled={true} />
+                            icon={<DAOSquareIcon />} 
+                            onClick={(e) => {
+                                switchPlatform(new DAOSquare(PlatformsData.daosquare.supportedChains), PlatformsData.daosquare);
+                            }} />
                     </VStack>
                 </Box>
                 <Divider orientation="vertical" />
@@ -189,7 +206,7 @@ export const HomeView = () => {
                         <Breadcrumb spacing='8px' mb="10px" separator={<FaChevronRight color='gray.500' />}>
                             <BreadcrumbItem><FaHome /></BreadcrumbItem>
                             <BreadcrumbItem>
-                                <Text>{currentPlatform.name}</Text>
+                                <Text>{platformData.name}</Text>
                             </BreadcrumbItem>
                             <BreadcrumbItem>
                                 <Text>{currentNetworkName}</Text>

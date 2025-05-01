@@ -3,6 +3,7 @@ import joyid from "./joyid.svg";
 import metamask from "./metamask.svg";
 import ethereum from "./ethereum.svg";
 import arb from "./arbitrum.svg";
+import base from "./base.svg";
 import celo from "./celo.svg";
 import gnosis from "./gnosis.svg";
 import op from "./op.svg";
@@ -23,6 +24,9 @@ export const EthereumIcon = forwardRef<ImageProps, "img">((props: any, ref: any)
 });
 export const ArbitrumIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={arb} ref={ref} width="2em" height="2em" {...props} />
+});
+export const BaseIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
+    return <chakra.img src={base} ref={ref} width="2em" height="2em" {...props} />
 });
 export const CeloIcon = forwardRef<ImageProps, "img">((props: any, ref: any) => {
     return <chakra.img src={celo} ref={ref} width="2em" height="2em" {...props} />

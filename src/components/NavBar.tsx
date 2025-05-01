@@ -16,13 +16,13 @@ import { EthWallet } from '../accounts/EthWallet';
 // import { DotbitContext } from '../chains/DotbitContext';
 
 export type NavBarType = {
-  onPlatformChanged: (newPlatform: PlatformDataType) => void;
+  //onPlatformChanged: (newPlatform: PlatformDataType) => void;
+  platformData: PlatformDataType;
 }
 
-export const NavBar = ({onPlatformChanged}: NavBarType ) => {
+export const NavBar = ({platformData}: NavBarType ) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { isOpen: isOpenOverlay, onOpen: onOpenOverlay, onClose: onCloseOverlay } = useDisclosure();
-  const [currentPlatform, setCurrentPlatform] = useState(PlatformsData.daohaus as PlatformDataType);
   const [account, setAccount] = React.useState(ViewData.wallet?.account || "");
   const [displayName, setDisplayName] = React.useState("");
   const nav = useNavigate();
@@ -92,14 +92,14 @@ export const NavBar = ({onPlatformChanged}: NavBarType ) => {
   const drawPlatformLinks = (direction: "column" | "row", display: any = {}) => {
     return (
       <Stack direction={direction} as={'nav'} spacing={4} fontSize="24px" display={display} alignItems="center">
-        <Link target="_blank" href={currentPlatform.website}><FaLink/></Link>
-        <Link target="_blank" href={currentPlatform.twitter}><FaTwitter/></Link>
-        <Link target="_blank" href={currentPlatform.discord}><FaDiscord/></Link>
-        {currentPlatform.forum.length > 4 ? <Link target="_blank" href={currentPlatform.forum}><FaDiscourse/></Link> : null}
-        <Link target="_blank" href={currentPlatform.github}><FaGithub/></Link>
-        {currentPlatform.gov.length > 4 ? <Link target="_blank" href={currentPlatform.gov}><FaHammer/></Link> : null}
+        <Link target="_blank" href={platformData.website}><FaLink/></Link>
+        <Link target="_blank" href={platformData.twitter}><FaTwitter/></Link>
+        <Link target="_blank" href={platformData.discord}><FaDiscord/></Link>
+        {platformData.forum.length > 4 ? <Link target="_blank" href={platformData.forum}><FaDiscourse/></Link> : null}
+        <Link target="_blank" href={platformData.github}><FaGithub/></Link>
+        {platformData.gov.length > 4 ? <Link target="_blank" href={platformData.gov}><FaHammer/></Link> : null}
         <Tag size="sm" bg="#a5b4f4" color="#4b5563" title='Version'>
-            <TagLabel>{`v${currentPlatform.version}`}</TagLabel>
+            <TagLabel>{`v${platformData.version}`}</TagLabel>
         </Tag>
       </Stack>
     );
