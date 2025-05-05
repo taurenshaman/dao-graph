@@ -7,24 +7,20 @@ import { DAOInfo } from '../models/DAOInfo';
 export class DAOSquare extends PlatformBase {
     // nextPaging: DAOhausPagingType = undefined as DAOhausPagingType;
     // previousPaging: DAOhausPagingType = undefined as DAOhausPagingType;
-    graphql_endpoint = "https://api.studio.thegraph.com/query/66101/phoenix-base/version/latest";
+    pageIndex: number = 0;
+    countPerPage: number = 20;
+    itemsCount: number = 0;
+    graphql_endpoint = `https://gateway.thegraph.com/api/${AppSettings.apiKey_theGraph}/subgraphs/id/FoTCW8c8aarckvxt4ukDK55CEn29qeUFh7Xi5pvFd3ph`;
     client = new ApolloClient({
-        //uri: this.graphql_endpoint,
-        link: new HttpLink({
-            uri: this.graphql_endpoint,
-            credentials: 'include',
-            fetchOptions: {
-                mode: 'no-cors',
-            },
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/graphql-response+json, application/json, multipart/mixed',
-              'Access-Control-Allow-Origin': '*',
-              'Access-Control-Allow-Credentials': "true",
-              Authorization: `Bearer ${AppSettings.apiKey_theGraph}`,
-            },
-        }),
-        cache: new InMemoryCache()
+      uri: this.graphql_endpoint,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/graphql-response+json, application/json, multipart/mixed',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Credentials': "true",
+      },
+      cache: new InMemoryCache()
     });
 
     constructor(supported_chains: Array<string>){
@@ -41,6 +37,7 @@ export class DAOSquare extends PlatformBase {
 
     override parse(originalItems: any) {
         this.items = [];
+        this.itemsCount = 0;
         if(!originalItems || !Array.isArray(originalItems) || originalItems.length === 0) return;
         originalItems.forEach((originalItem) => {
             this.items.push({
@@ -53,19 +50,20 @@ export class DAOSquare extends PlatformBase {
                 proposalCount: 0
             });
         });
+        this.itemsCount = this.items.length;
     }
 
     override clearPaging() {
-        // this.nextPaging = undefined;
-        // this.previousPaging = undefined;
+        this.pageIndex = 0;
     }
 
-    async doLoadDaos(query: string, pageIndex = 0) {
+    async doLoadDaos(query: string) {
         const first = this.CountPerPage;
+        const skip = this.CountPerPage * this.pageIndex;
         try {
-            const ql = query && query.length > 0 ? gql`
-                query listDaos($query: String!){
-                    daoEntiys(orderBy: createTimeStamp, orderDirection: desc, where: {daoName_contains_nocase: $query }) {
+            const ql = query && query.length > 0 ? `
+                query listDaos($query: String, $first: Int, $skip: Int){
+                    daoEntiys(first: $first, skip: $skip, orderBy: createTimeStamp, orderDirection: desc, where: {daoName_contains_nocase: $query }) {
                         id
                         daoAddr
                         daoName
@@ -73,9 +71,9 @@ export class DAOSquare extends PlatformBase {
                         daoType
                     }
                 }
-            ` : gql`
-                query listDaos {
-                    daoEntiys(orderBy: createTimeStamp, orderDirection: desc) {
+            ` : `
+                query listDaos($first: Int, $skip: Int) {
+                    daoEntiys(first: $first, skip: $skip, orderBy: createTimeStamp, orderDirection: desc) {
                         id
                         daoAddr
                         daoName
@@ -84,56 +82,13 @@ export class DAOSquare extends PlatformBase {
                     }
                 }
             `;
-            // const ql = query && query.length > 0 ? gql`
-            //     query {
-            //         daoEntiys(first: $first, orderBy: createTimeStamp, orderDirection: desc, where: {daoName_contains_nocase: $query }) {
-            //             id
-            //             daoAddr
-            //             daoName
-            //             creator
-            //             daoType
-            //         }
-            //     }
-            // ` : gql`
-            //     query {
-            //         daoEntiys(first: $first, orderBy: createTimeStamp, orderDirection: desc) {
-            //             id
-            //             daoAddr
-            //             daoName
-            //             creator
-            //             daoType
-            //         }
-            //     }
-            // `;
-            // const ql = query && query.length > 0 ? gql`
-            //     query listDaos {
-            //         daoEntiys(first: ${first}, orderBy: createTimeStamp, orderDirection: desc, where: {daoName_contains_nocase: '${query}' }) {
-            //             id
-            //             daoAddr
-            //             daoName
-            //             creator
-            //             daoType
-            //         }
-            //     }
-            // ` : gql`
-            //     query listDaos {
-            //         daoEntiys(first: ${first}, orderBy: createTimeStamp, orderDirection: desc) {
-            //             id
-            //             daoAddr
-            //             daoName
-            //             creator
-            //             daoType
-            //         }
-            //     }
-            // `;
             console.log(ql);
             const res = await this.client.query({
-                query: ql,
+                query: gql(ql),
                 variables: query && query.length > 0 ? {
-                    first,
-                    query
+                    query, first, skip
                 } : {
-                    first
+                  first, skip
                 }
             });
             console.log(res);
@@ -149,23 +104,25 @@ export class DAOSquare extends PlatformBase {
     }
 
     override async loadDaos(query: string) {
-        //const paging = createPaging0(this.CountPerPage);
+        this.clearPaging();
         await this.doLoadDaos(query);
     }
 
     override async loadDaosNext(query: string) {
-        //await this.doLoadDaos(query, this.nextPaging);
+      this.pageIndex++;
+      await this.doLoadDaos(query);
     }
 
     override async loadDaosPrevious(query: string) {
-        //await this.doLoadDaos(query, this.previousPaging);
+      this.clearPaging();
+      await this.doLoadDaos(query);
     }
 
     override canLoadNextPage(): boolean {
-        return this.chainId.length > 0 && false;
+        return this.chainId.length > 0 && this.itemsCount == this.CountPerPage;
     }
     override canLoadPreviousPage(): boolean {
-        return this.chainId.length > 0 && false;
+        return this.chainId.length > 0 && this.pageIndex > 0;
     }
 }
 

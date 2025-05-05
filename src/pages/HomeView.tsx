@@ -6,7 +6,7 @@ import { ViewData } from "../client/ViewData";
 import { ChainsInfo } from "../client/ChainsInfo";
 import { useNavigate } from "react-router-dom";
 import { RoutesData } from "../client/RoutesData";
-import { AragonIcon, ArbitrumIcon, CeloIcon, DAOSquareIcon, DAOhausIcon, EthereumIcon, GnosisIcon, OptimismIcon, PolygonIcon } from "../icons/Icons";
+import { AragonIcon, ArbitrumIcon, BaseIcon, CeloIcon, DAOSquareIcon, DAOhausIcon, EthereumIcon, GnosisIcon, OptimismIcon, PolygonIcon } from "../icons/Icons";
 import coverSvg from "../icons/cover.svg";
 import { DAOInfo } from "../models/DAOInfo";
 import { PlatformDataType, PlatformsData } from "../platforms/PlatformsData";
@@ -49,8 +49,16 @@ export const HomeView = () => {
         await search(queryParam, false);
     }
 
+    // const supportChain = (chainId: string) => {
+    //     return currentNetworkId === chainId || supportedChains.indexOf(chainId) < 0;
+    // }
+
     const supportChain = (chainId: string) => {
-        return currentNetworkId === chainId || supportedChains.indexOf(chainId) < 0;
+        return supportedChains.indexOf(chainId) >= 0;
+    }
+
+    const isSelectedChain = (chainId: string) => {
+        return currentNetworkId === chainId;
     }
 
     const clearQuery = () => {
@@ -108,6 +116,8 @@ export const HomeView = () => {
                 return EthereumIcon;
             case ChainsInfo.arbitrum.mainnet.requestParams.chainId:
                 return ArbitrumIcon;
+            case ChainsInfo.base.mainnet.requestParams.chainId:
+                return BaseIcon;
             case ChainsInfo.gnosis.mainnet.requestParams.chainId:
                 return GnosisIcon;
             case ChainsInfo.optimism.mainnet.requestParams.chainId:
@@ -121,36 +131,42 @@ export const HomeView = () => {
     const renderNetworks = () => {
         return (
             <HStack spacing='5px'>
-                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.ethereum.mainnet.requestParams.chainId)}
+                {supportChain(ChainsInfo.ethereum.mainnet.requestParams.chainId) ? 
+                <IconButton isRound={true} isDisabled={isSelectedChain(ChainsInfo.ethereum.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Ethereum" aria-label='Ethereum' fontSize='20px'
                     icon={<EthereumIcon />}
-                    onClick={e => switchNetwork(ChainsInfo.ethereum.mainnet.requestParams.chainId, ChainsInfo.ethereum.name)} />
-                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.arbitrum.mainnet.requestParams.chainId)}
+                    onClick={e => switchNetwork(ChainsInfo.ethereum.mainnet.requestParams.chainId, ChainsInfo.ethereum.name)} /> : null}
+                {supportChain(ChainsInfo.arbitrum.mainnet.requestParams.chainId) ? 
+                <IconButton isRound={true} isDisabled={isSelectedChain(ChainsInfo.arbitrum.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Arbitrum" aria-label='Arbitrum' fontSize='20px'
                     icon={<ArbitrumIcon />}
-                    onClick={e => switchNetwork(ChainsInfo.arbitrum.mainnet.requestParams.chainId, ChainsInfo.arbitrum.name)} />
-                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.base.mainnet.requestParams.chainId)}
+                    onClick={e => switchNetwork(ChainsInfo.arbitrum.mainnet.requestParams.chainId, ChainsInfo.arbitrum.name)} /> : null}
+                {supportChain(ChainsInfo.base.mainnet.requestParams.chainId) ? 
+                <IconButton isRound={true} isDisabled={isSelectedChain(ChainsInfo.base.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Base" aria-label='Base' fontSize='20px'
                     icon={<CeloIcon />}
-                    onClick={e => switchNetwork(ChainsInfo.base.mainnet.requestParams.chainId, ChainsInfo.base.name)} />
-                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.gnosis.mainnet.requestParams.chainId)}
+                    onClick={e => switchNetwork(ChainsInfo.base.mainnet.requestParams.chainId, ChainsInfo.base.name)} /> : null}
+                {supportChain(ChainsInfo.gnosis.mainnet.requestParams.chainId) ? 
+                <IconButton isRound={true} isDisabled={isSelectedChain(ChainsInfo.gnosis.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Gnosis" aria-label='Gnosis' fontSize='20px'
                     icon={<GnosisIcon />}
-                    onClick={e => switchNetwork(ChainsInfo.gnosis.mainnet.requestParams.chainId, ChainsInfo.gnosis.name)} />
-                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.optimism.mainnet.requestParams.chainId)}
+                    onClick={e => switchNetwork(ChainsInfo.gnosis.mainnet.requestParams.chainId, ChainsInfo.gnosis.name)} /> : null}
+                {supportChain(ChainsInfo.optimism.mainnet.requestParams.chainId) ? 
+                <IconButton isRound={true} isDisabled={isSelectedChain(ChainsInfo.optimism.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="OP" aria-label='OP' fontSize='20px'
                     icon={<OptimismIcon />}
-                    onClick={e => switchNetwork(ChainsInfo.optimism.mainnet.requestParams.chainId, ChainsInfo.optimism.name)} />
-                <IconButton isRound={true} isDisabled={supportChain(ChainsInfo.polygon.mainnet.requestParams.chainId)}
+                    onClick={e => switchNetwork(ChainsInfo.optimism.mainnet.requestParams.chainId, ChainsInfo.optimism.name)} /> : null}
+                {supportChain(ChainsInfo.polygon.mainnet.requestParams.chainId) ? 
+                <IconButton isRound={true} isDisabled={isSelectedChain(ChainsInfo.polygon.mainnet.requestParams.chainId)}
                     variant='solid' bg="transparent"
                     title="Polygon" aria-label='Polygon' fontSize='20px'
                     icon={<PolygonIcon />}
-                    onClick={e => switchNetwork(ChainsInfo.polygon.mainnet.requestParams.chainId, ChainsInfo.polygon.name)} />
+                    onClick={e => switchNetwork(ChainsInfo.polygon.mainnet.requestParams.chainId, ChainsInfo.polygon.name)} /> : null}
             </HStack>
         );
     }
