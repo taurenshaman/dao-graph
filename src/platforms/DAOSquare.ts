@@ -5,20 +5,17 @@ import { ChainsInfo } from '../client/ChainsInfo';
 import { DAOInfo } from '../models/DAOInfo';
 
 export class DAOSquare extends PlatformBase {
-    // nextPaging: DAOhausPagingType = undefined as DAOhausPagingType;
-    // previousPaging: DAOhausPagingType = undefined as DAOhausPagingType;
     pageIndex: number = 0;
     countPerPage: number = 20;
     itemsCount: number = 0;
     graphql_endpoint = `https://gateway.thegraph.com/api/${AppSettings.apiKey_theGraph}/subgraphs/id/FoTCW8c8aarckvxt4ukDK55CEn29qeUFh7Xi5pvFd3ph`;
     client = new ApolloClient({
       uri: this.graphql_endpoint,
-      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/graphql-response+json, application/json, multipart/mixed',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Credentials': "true",
+        // 'Access-Control-Allow-Origin': 'include',
+        // 'Access-Control-Allow-Credentials': "true",
       },
       cache: new InMemoryCache()
     });
@@ -32,7 +29,6 @@ export class DAOSquare extends PlatformBase {
 
     override getDefaultChainId() { return ChainsInfo.base.mainnet.requestParams.chainId; }
 
-    // TODO
     override getLinkOfDAO(dao: DAOInfo) { return `https://app.daosquare.fi/venturedaos/${dao.daoType}/${dao.id}`; }
 
     override parse(originalItems: any) {
@@ -92,8 +88,6 @@ export class DAOSquare extends PlatformBase {
                 }
             });
             console.log(res);
-            // this.nextPaging = res.nextPaging;
-            // this.previousPaging = res.previousPaging;
             this.parse(res.data.daoEntiys);
         }
         catch(error){
@@ -114,7 +108,7 @@ export class DAOSquare extends PlatformBase {
     }
 
     override async loadDaosPrevious(query: string) {
-      this.clearPaging();
+      this.pageIndex--;
       await this.doLoadDaos(query);
     }
 
